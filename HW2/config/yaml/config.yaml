@@ -1,18 +1,21 @@
-name: Mnist_LeNet
+name: CreditCard_DNN
 n_gpu: 1
 
-arch:
-  type: MnistModel
-  args: {}
-
 data_loader:
-  type: MnistDataLoader
+  type: CreditCardDataLoader
   args:
-    data_dir: data/
-    batch_size: 128
+    data_dir: ../Data/hw2/
+    filename: creditcard_small.csv
+    batch_size: 1024
     shuffle: true
-    validation_split: 0.1
-    num_workers: 2
+    validation_split: 0.2
+    num_workers: 4
+
+arch:
+  type: DNN
+  args:
+    num_features: 28
+    num_classes: 2
 
 optimizer:
   type: Adam
@@ -25,19 +28,22 @@ loss: nll_loss
 
 metrics:
   - accuracy
-  - top_k_acc
+  - precision
+  - recall
+  - f1_score
 
-lr_scheduler:
-  type: StepLR
-  args:
-    step_size: 50
-    gamma: 0.1
+plots:
+  - confusion_matrix
+  - roc_curve
+  - precision_recall_curve
+  - lift_curve
 
 trainer:
-  epochs: 100
-  save_dir: saved/
+  epochs: 50
+  save_dir: ../Checkpoint/hw2/
   save_period: 1
+  log_step: 10
   verbosity: 2
   monitor: min val_loss
   early_stop: 10
-  tensorboard: true
+  tensorboard: True

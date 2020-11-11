@@ -1,4 +1,6 @@
 import torch
+from sklearn.metrics import precision_score
+from sklearn.metrics import confusion_matrix as cm
 
 
 def accuracy(output, target):
@@ -9,7 +11,6 @@ def accuracy(output, target):
         correct += torch.sum(pred == target).item()
     return correct / len(target)
 
-
 def top_k_acc(output, target, k=3):
     with torch.no_grad():
         pred = torch.topk(output, k, dim=1)[1]
@@ -18,3 +19,45 @@ def top_k_acc(output, target, k=3):
         for i in range(k):
             correct += torch.sum(pred[:, i] == target).item()
     return correct / len(target)
+
+def precision(output, target):
+    with torch.no_grad():
+        pred = torch.argmax(output, dim=1)
+        assert pred.shape[0] == len(target)
+        true_positive = 0
+        pred_positive = 0
+        true_positive += torch.sum((pred == 1) * (target == 1)).item()
+        pred_positive += torch.sum(pred == 1).item()
+
+    if pred_positive == 0:
+        return 0.0 
+    else:
+        return true_positive / pred_positive
+
+def recall(output, target):
+    with torch.no_grad():
+        pred = torch.argmax(output, dim=1)
+        assert pred.shape[0] == len(target)
+        true_positive = 0
+        positive = 0
+        true_positive += torch.sum((pred == 1) * (target == 1)).item()
+        positive += torch.sum(target == 1).item()
+    
+    if positive == 0:
+        return 0.0
+    else:
+        return true_positive / positive
+
+def f1_score(output, target):
+    if (precision(output, target) + recall(output, target)) == 0:
+        return 0.0
+    else:
+        return 2 * precision(output, target) * recall(output, target) / (precision(output, target) + recall(output, target))
+
+def sklearn(output, target):
+    with torch.no_grad():
+        pred = torch.argmax(output, dim=1)
+        assert pred.shape[0] == len(target)
+
+    return cm(target.cpu(), pred.cpu())
+

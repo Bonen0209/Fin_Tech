@@ -30,6 +30,10 @@ def read_yaml(fname):
     with fname.open('rt') as handle:
         return yaml.load(handle, Loader=yaml.FullLoader)
 
+def read_csv(fname):
+    fname = Path(fname)
+    return pd.read_csv(fname)
+
 def write_json(content, fname):
     fname = Path(fname)
     with fname.open('wt') as handle:

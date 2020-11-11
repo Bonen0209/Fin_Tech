@@ -9,9 +9,9 @@ class Trainer(BaseTrainer):
     """
     Trainer class
     """
-    def __init__(self, model, criterion, metric_ftns, optimizer, config, data_loader,
+    def __init__(self, model, criterion, metric_ftns, plot_ftns, optimizer, config, data_loader,
                  valid_data_loader=None, lr_scheduler=None, len_epoch=None):
-        super().__init__(model, criterion, metric_ftns, optimizer, config)
+        super().__init__(model, criterion, metric_ftns, plot_ftns, optimizer, config)
         self.config = config
         self.data_loader = data_loader
         if len_epoch is None:
@@ -24,7 +24,8 @@ class Trainer(BaseTrainer):
         self.valid_data_loader = valid_data_loader
         self.do_validation = self.valid_data_loader is not None
         self.lr_scheduler = lr_scheduler
-        self.log_step = int(np.sqrt(data_loader.batch_size))
+        # self.log_step = int(np.sqrt(data_loader.batch_size))
+        self.log_step = config['trainer']['log_step']
 
         self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
         self.valid_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
@@ -57,7 +58,9 @@ class Trainer(BaseTrainer):
                     epoch,
                     self._progress(batch_idx),
                     loss.item()))
-                self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
+                for plt in self.plot_ftns:
+                    self.writer.add_image(plt.__name__, plt(output, target))
+                # self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
 
             if batch_idx == self.len_epoch:
                 break
@@ -91,7 +94,16 @@ class Trainer(BaseTrainer):
                 self.valid_metrics.update('loss', loss.item())
                 for met in self.metric_ftns:
                     self.valid_metrics.update(met.__name__, met(output, target))
-                self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
+                #for plt in self.plot_ftns:
+                #    self.writer.add_image(plt.__name__, plt(output, target))
+                # self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
+
+            data, target = self.valid_data_loader.dataset.datas.to(self.device), self.valid_data_loader.dataset.targets.to(self.device)
+            output = self.model(data)
+
+            for plt in self.plot_ftns:
+                self.writer.add_image(plt.__name__, plt(output, target))
+
 
         # add histogram of model parameters to the tensorboard
         for name, p in self.model.named_parameters():
