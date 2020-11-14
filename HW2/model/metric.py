@@ -1,6 +1,4 @@
 import torch
-from sklearn.metrics import precision_score
-from sklearn.metrics import confusion_matrix as cm
 
 
 def accuracy(output, target):

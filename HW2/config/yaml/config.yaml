@@ -6,7 +6,7 @@ data_loader:
   args:
     data_dir: ../Data/hw2/
     filename: creditcard_small.csv
-    batch_size: 1024
+    batch_size: 256
     shuffle: true
     validation_split: 0.2
     num_workers: 4

@@ -11,6 +11,7 @@ from sklearn.tree import DecisionTreeClassifier
 import matplotlib.pyplot as plt
 
 from scikitplot.metrics import plot_cumulative_gain
+from scikitplot.helpers import cumulative_gain_curve
 
 # fix random seeds for reproducibility
 SEED = 123
@@ -42,9 +43,11 @@ def main(config):
     plt.savefig(f'DST_PRC.png')
     plt.close()
 
-    preds_prob[:, 0] = 1 - Y_test
-    plot_cumulative_gain(Y_test, preds_prob)
-    plt.legend(loc='lower right')
+    #plot_cumulative_gain(Y_test, preds_prob)
+    p, g = cumulative_gain_curve(Y_test, preds_prob[:, 1])
+    plt.plot(p, g)
+    plt.plot([0, preds.sum()/len(preds), 1], [0, 1, 1])
+    plt.plot([0, 1], [0, 1], linestyle='--')
     plt.savefig(f'DST_LIFT.png')
     plt.close()
 
