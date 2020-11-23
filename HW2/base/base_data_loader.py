@@ -55,7 +55,9 @@ class BaseDataLoader(DataLoader):
         return train_sampler, valid_sampler
 
     def split_validation(self):
+        valid_kwargs = self.init_kwargs.copy()
+        valid_kwargs['batch_size'] = int(len(valid_kwargs['dataset']) * self.validation_split)
         if self.valid_sampler is None:
             return None
         else:
-            return DataLoader(sampler=self.valid_sampler, **self.init_kwargs)
+            return DataLoader(sampler=self.valid_sampler, **valid_kwargs)
