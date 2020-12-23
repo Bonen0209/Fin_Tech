@@ -11,6 +11,7 @@ class FashionMnistDataLoader(BaseDataLoader):
             trsfm = transforms.Compose([
                 getattr(transforms, trans)(**transform_args[trans]) for trans in transform_args
             ])
+        
         else:
             trsfm = transforms.Compose([])
         self.data_dir = data_dir

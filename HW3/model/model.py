@@ -9,9 +9,9 @@ class CNN_Simple(BaseModel):
         super().__init__()
         self.conv1 = nn.Conv2d(1, 16, kernel_size=5)
         self.conv2 = nn.Conv2d(16, 32, kernel_size=5)
-        self.fc1 = nn.Linear(512, 256)
-        self.fc2 = nn.Linear(256, 64)
-        self.fc3 = nn.Linear(64, num_classes)
+        self.fc1 = nn.Linear(512, 128)
+        self.fc2 = nn.Linear(128, 32)
+        self.fc3 = nn.Linear(32, num_classes)
 
         self.dropout = nn.Dropout(p=drop_prob)
 
