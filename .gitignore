@@ -1,2 +1,13 @@
+# Data
 Data
+
+# Checkpoint
 Checkpoint
+
+# Latex
+*.aux
+*.log
+*.out
+
+# Submit
+*r08942073*
