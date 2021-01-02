@@ -3,20 +3,103 @@ import torch.nn.functional as F
 from base import BaseModel
 
 
-class MnistModel(BaseModel):
-    def __init__(self, num_classes=10):
+class SimpleRNN(BaseModel):
+    def __init__(self, embedding_dim, hidden_dim, seq_len):
         super().__init__()
-        self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
-        self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
-        self.conv2_drop = nn.Dropout2d()
-        self.fc1 = nn.Linear(320, 50)
-        self.fc2 = nn.Linear(50, num_classes)
+        self.embedding_dim = embedding_dim
+        self.hidden_dim = hidden_dim
+        self.seq_len = seq_len
+
+        self.rnn = nn.RNN(
+            input_size=self.embedding_dim,
+            hidden_size=self.hidden_dim,
+            batch_first=True
+        )
+
+        self.linear = nn.ModuleDict({
+            'hidden': nn.Linear(self.hidden_dim, 1),
+            'seq': nn.Linear(self.seq_len, 1)
+        })
 
     def forward(self, x):
-        x = F.relu(F.max_pool2d(self.conv1(x), 2))
-        x = F.relu(F.max_pool2d(self.conv2_drop(self.conv2(x)), 2))
-        x = x.view(-1, 320)
-        x = F.relu(self.fc1(x))
-        x = F.dropout(x, training=self.training)
-        x = self.fc2(x)
-        return F.log_softmax(x, dim=1)
+        batch_size = x.size(0)
+
+        output, hidden = self.rnn(x)
+
+        output = output.permute(0, 2, 1)
+        output = self.linear['seq'](output)
+        output = output.permute(0, 2, 1)
+
+        hidden = hidden.permute(1, 0, 2)
+        hidden += output
+        hidden = self.linear['hidden'](hidden)
+
+        return hidden.view(batch_size)
+
+
+class GRU(BaseModel):
+    def __init__(self, embedding_dim, hidden_dim, seq_len):
+        super().__init__()
+        self.embedding_dim = embedding_dim
+        self.hidden_dim = hidden_dim
+        self.seq_len = seq_len
+
+        self.gru = nn.GRU(
+            input_size=self.embedding_dim,
+            hidden_size=self.hidden_dim,
+            batch_first=True
+        )
+
+        self.linear = nn.ModuleDict({
+            'hidden': nn.Linear(self.hidden_dim, 1),
+            'seq': nn.Linear(self.seq_len, 1)
+        })
+
+    def forward(self, x):
+        batch_size = x.size(0)
+
+        output, hidden = self.gru(x)
+
+        output = output.permute(0, 2, 1)
+        output = self.linear['seq'](output)
+        output = output.permute(0, 2, 1)
+
+        hidden = hidden.permute(1, 0, 2)
+        hidden += output
+        hidden = self.linear['hidden'](hidden)
+
+        return hidden.view(batch_size)
+
+
+class LSTM(BaseModel):
+    def __init__(self, embedding_dim, hidden_dim, seq_len):
+        super().__init__()
+        self.embedding_dim = embedding_dim
+        self.hidden_dim = hidden_dim
+        self.seq_len = seq_len
+
+        self.lstm = nn.LSTM(
+            input_size=self.embedding_dim,
+            hidden_size=self.hidden_dim,
+            batch_first=True
+        )
+
+        self.linear = nn.ModuleDict({
+            'hidden': nn.Linear(self.hidden_dim, 1),
+            'seq': nn.Linear(self.seq_len, 1)
+        })
+
+    def forward(self, x):
+        batch_size = x.size(0)
+
+        output, (hidden, cell) = self.lstm(x)
+
+        output = output.permute(0, 2, 1)
+        output = self.linear['seq'](output)
+        output = output.permute(0, 2, 1)
+
+        hidden = hidden.permute(1, 0, 2)
+        hidden += output
+        hidden = self.linear['hidden'](hidden)
+
+        return hidden.view(batch_size)

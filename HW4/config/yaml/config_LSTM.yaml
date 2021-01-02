@@ -1,12 +1,12 @@
-name: Finance_RNN
+name: Finance_LSTM
 n_gpu: 1
-#non_blocking: true
 
 arch:
-  type: SimpleRNN
+  type: LSTM
   args:
     embedding_dim: 10
     hidden_dim: 64
+    seq_len: 30
 
 data_loader:
   type: FinanceDataLoader
@@ -14,14 +14,14 @@ data_loader:
     data_dir: ../Data/hw4/
     batch_size: 128
     shuffle: true
-    validation_split: 0.2
-    num_workers: 2
-    #pin_memory: false
+    validation_split: 0.0
+    num_workers: 4
+    pin_memory: true
 
 optimizer:
   type: Adam
   args:
-    lr: 0.001
+    lr: 0.0001
     weight_decay: 0
     amsgrad: true
 
@@ -30,7 +30,8 @@ loss: mse_loss
 metrics:
   - mean_square_error
 
-plots: {}
+plots:
+  - predict_curve
 
 lr_scheduler:
   type: StepLR
@@ -39,14 +40,14 @@ lr_scheduler:
     gamma: 0.1
 
 trainer:
-  epochs: 100
+  epochs: 50
   save_dir: ../Checkpoint/hw4/
   save_period: 1
   log_step: 10
   verbosity: 2
   monitor: min val_loss
-  early_stop: 10
-  tensorboard: false
+  early_stop: 50
+  tensorboard: true
 
 tester:
   verbosity: 2

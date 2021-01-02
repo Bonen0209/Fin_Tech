@@ -74,3 +74,17 @@ def precision_recall_curve(output, target):
     plt.close(fig)
 
     return image
+
+def predict_curve(output, target):
+    fig = plt.figure()
+    plt.plot(output.cpu().detach().numpy())
+    plt.plot(target.cpu().detach().numpy())
+    fig.canvas.draw()
+
+    buf = np.asarray(fig.canvas.buffer_rgba(), dtype=np.uint8)[:, :, :3]
+    image = torch.from_numpy(buf).permute(2, 0, 1)
+
+    plt.close(fig)
+
+    return image
+        

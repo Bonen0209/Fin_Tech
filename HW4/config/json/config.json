@@ -1,6 +1,7 @@
 {
     "name": "Mnist_LeNet",
     "n_gpu": 1,
+    "non_blocking": true,
 
     "arch": {
         "type": "MnistModel",
@@ -13,7 +14,8 @@
             "batch_size": 128,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 2
+            "num_workers": 2,
+            "pin_memory": false
         }
     },
     "optimizer": {
